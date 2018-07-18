@@ -112,20 +112,18 @@ void activate_array_prelu(float *x, const int n, const ACTIVATION a,
                           int n_weights, float *activation_weights)
 {
     int i;
-    int channel_count = 0;
     float *activation_weights_ptr = activation_weights;
-    fprintf(stderr, "%d - %d\n", n_weights, n);
+    //fprintf(stderr, "%d - %d\n", n_weights, n);
     for (unsigned c = 0; c < n_weights; c++)
     {
         float alpha = *activation_weights_ptr;
-        fprintf(stderr, "%f ", alpha);
+        //fprintf(stderr, "%f ", alpha);
         for (unsigned i = 0; i < n/n_weights; i++)
         {
             x[c*(n/n_weights)+i] = activate_prelu(x[c*(n/n_weights)+i], alpha);
         }
         activation_weights_ptr++;
     }
-    fprintf(stderr, "\n");
 }
 
 float gradient(float x, ACTIVATION a)

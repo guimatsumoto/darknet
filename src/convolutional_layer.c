@@ -411,7 +411,7 @@ convolutional_layer make_convolutional_prelu_layer(int batch, int h, int w, int 
     }
 
 #ifdef GPU
-    l.forward_gpu = forward_convolutional_layer_gpu;
+    l.forward_gpu = forward_convolutional_prelu_layer_gpu;
     l.backward_gpu = backward_convolutional_layer_gpu;
     l.update_gpu = update_convolutional_layer_gpu;
 

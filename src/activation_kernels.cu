@@ -47,7 +47,13 @@ __device__ float stair_activate_kernel(float x)
     if (n%2 == 0) return floorf(x/2);
     else return (x - n) + floorf(x/2);
 }
- 
+
+__device__ float prelu_activate_kernel(float x, float alpha)
+{
+    if (x <0)
+        return alpha*x;
+    return x;
+} 
 
 __device__ float hardtan_gradient_kernel(float x)
 {
@@ -72,6 +78,11 @@ __device__ float stair_gradient_kernel(float x)
 {
     if (floorf(x) == x) return 0;
     return 1;
+}
+
+__device__ float activate_prelu_kernel(float x, ACTIVATION a, float alpha)
+{
+    return prelu_activate_kernel(x, alpha);
 }
 
 __device__ float activate_kernel(float x, ACTIVATION a)
@@ -181,6 +192,13 @@ __global__ void activate_array_kernel(float *x, int n, ACTIVATION a)
     if(i < n) x[i] = activate_kernel(x[i], a);
 }
 
+__global__ void activate_array_prelu_kernel(float *x, int n, ACTIVATION a, int n_weights, float *activation_weights)
+{
+    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    int j = (int)(i/(n/n_weights));
+    if(i < n) x[i] = activate_prelu_kernel(x[i], a, activation_weights[j]);
+}
+
 __global__ void gradient_array_kernel(float *x, int n, ACTIVATION a, float *delta)
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
@@ -190,6 +208,12 @@ __global__ void gradient_array_kernel(float *x, int n, ACTIVATION a, float *delt
 extern "C" void activate_array_gpu(float *x, int n, ACTIVATION a) 
 {
     activate_array_kernel<<<cuda_gridsize(n), BLOCK>>>(x, n, a);
+    check_error(cudaPeekAtLastError());
+}
+
+extern "C" void activate_array_prelu_gpu(float *x, int n, ACTIVATION a, int n_weights, float *activation_weights) 
+{
+    activate_array_prelu_kernel<<<cuda_gridsize(n), BLOCK>>>(x, n, a, n_weights, activation_weights);
     check_error(cudaPeekAtLastError());
 }
 

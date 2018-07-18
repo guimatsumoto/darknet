@@ -13,6 +13,7 @@ void gradient_array(const float *x, const int n, const ACTIVATION a, float *delt
 void activate_array(float *x, const int n, const ACTIVATION a);
 #ifdef GPU
 void activate_array_gpu(float *x, int n, ACTIVATION a);
+void activate_array_prelu_gpu(float *x, int n, ACTIVATION a, int n_weights, float *activation_weights);
 void gradient_array_gpu(float *x, int n, ACTIVATION a, float *delta);
 #endif
 
