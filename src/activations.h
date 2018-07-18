@@ -50,6 +50,14 @@ static inline float lhtan_activate(float x)
     if(x > 1) return .001*(x-1) + 1;
     return x;
 }
+
+static inline float prelu_activate(float x, float alpha)
+{
+    if (x < 0)
+        return alpha*x;
+    return x;
+}
+
 static inline float lhtan_gradient(float x)
 {
     if(x > 0 && x < 1) return 1;
@@ -80,6 +88,7 @@ static inline float ramp_gradient(float x){return (x>0)+.1;}
 static inline float leaky_gradient(float x){return (x>0) ? 1 : .1;}
 static inline float tanh_gradient(float x){return 1-x*x;}
 static inline float plse_gradient(float x){return (x < 0 || x > 1) ? .01 : .125;}
+static inline float prelu_gradient(float x, float alpha){return (x < 0) ? alpha*x : x;}
 
 #endif
 
