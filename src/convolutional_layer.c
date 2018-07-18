@@ -257,6 +257,10 @@ convolutional_layer make_convolutional_layer(int batch, int h, int w, int c, int
         l.scale_v = calloc(n, sizeof(float));
     }
 
+    l.activation = activation;
+    l.n_activation_weights =  0;
+    l.activation_weights = calloc(l.n_activation_weights, sizeof(float));
+
 #ifdef GPU
     l.forward_gpu = forward_convolutional_layer_gpu;
     l.backward_gpu = backward_convolutional_layer_gpu;
@@ -305,6 +309,16 @@ convolutional_layer make_convolutional_layer(int batch, int h, int w, int c, int
             l.x_gpu = cuda_make_array(l.output, l.batch*out_h*out_w*n);
             l.x_norm_gpu = cuda_make_array(l.output, l.batch*out_h*out_w*n);
         }
+
+        if (activation == PRELU)
+        {
+            l.activation_weights_gpu = cuda_make_array(l.activation_weights, l.n_activation_weights);
+        }
+        else
+        {
+            l.activation_weights_gpu = NULL;
+        }
+
 #ifdef CUDNN
         cudnnCreateTensorDescriptor(&l.normTensorDesc);
         cudnnCreateTensorDescriptor(&l.srcTensorDesc);
@@ -319,7 +333,7 @@ convolutional_layer make_convolutional_layer(int batch, int h, int w, int c, int
     }
 #endif
     l.workspace_size = get_workspace_size(l);
-    l.activation = activation;
+    //l.activation = activation;
 
     fprintf(stderr, "conv  %5d %2d x%2d /%2d  %4d x%4d x%4d   ->  %4d x%4d x%4d\n", n, size, size, stride, w, h, c, l.out_w, l.out_h, l.out_c);
 
@@ -410,6 +424,10 @@ convolutional_layer make_convolutional_prelu_layer(int batch, int h, int w, int 
         l.scale_v = calloc(n, sizeof(float));
     }
 
+    l.activation = activation;
+    l.n_activation_weights = n_activation_weights;
+    l.activation_weights = calloc(l.n_activation_weights, sizeof(float));
+
 #ifdef GPU
     l.forward_gpu = forward_convolutional_prelu_layer_gpu;
     l.backward_gpu = backward_convolutional_layer_gpu;
@@ -458,6 +476,15 @@ convolutional_layer make_convolutional_prelu_layer(int batch, int h, int w, int 
             l.x_gpu = cuda_make_array(l.output, l.batch*out_h*out_w*n);
             l.x_norm_gpu = cuda_make_array(l.output, l.batch*out_h*out_w*n);
         }
+
+        if (activation == PRELU)
+        {
+            l.activation_weights_gpu = cuda_make_array(l.activation_weights, l.n_activation_weights);
+        }
+        else
+        {
+            l.activation_weights_gpu = NULL;
+        }
 #ifdef CUDNN
         cudnnCreateTensorDescriptor(&l.normTensorDesc);
         cudnnCreateTensorDescriptor(&l.srcTensorDesc);
@@ -472,9 +499,9 @@ convolutional_layer make_convolutional_prelu_layer(int batch, int h, int w, int 
     }
 #endif
     l.workspace_size = get_workspace_size(l);
-    l.activation = activation;
-    l.n_activation_weights = n_activation_weights;
-    l.activation_weights = calloc(l.n_activation_weights, sizeof(float));
+    //l.activation = activation;
+    //l.n_activation_weights = n_activation_weights;
+    //l.activation_weights = calloc(l.n_activation_weights, sizeof(float));
     fprintf(stderr, "conv  %5d %2d x%2d /%2d  %4d x%4d x%4d   ->  %4d x%4d x%4d\n", n, size, size, stride, w, h, c, l.out_w, l.out_h, l.out_c);
 
     return l;
