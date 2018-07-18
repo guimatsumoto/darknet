@@ -91,10 +91,13 @@ float activate(float x, ACTIVATION a)
             return hardtan_activate(x);
         case LHTAN:
             return lhtan_activate(x);
-        case PRELU:
-            return prelu_activate(x, 0.01);
     }
     return 0;
+}
+
+float activate_prelu(float x, float alpha)
+{
+    return prelu_activate(x, alpha);
 }
 
 void activate_array(float *x, const int n, const ACTIVATION a)
@@ -103,6 +106,26 @@ void activate_array(float *x, const int n, const ACTIVATION a)
     for(i = 0; i < n; ++i){
         x[i] = activate(x[i], a);
     }
+}
+
+void activate_array_prelu(float *x, const int n, const ACTIVATION a,
+                          int n_weights, float *activation_weights)
+{
+    int i;
+    int channel_count = 0;
+    float *activation_weights_ptr = activation_weights;
+    fprintf(stderr, "%d - %d\n", n_weights, n);
+    for (unsigned c = 0; c < n_weights; c++)
+    {
+        float alpha = *activation_weights_ptr;
+        fprintf(stderr, "%f ", alpha);
+        for (unsigned i = 0; i < n/n_weights; i++)
+        {
+            x[c*(n/n_weights)+i] = activate_prelu(x[c*(n/n_weights)+i], alpha);
+        }
+        activation_weights_ptr++;
+    }
+    fprintf(stderr, "\n");
 }
 
 float gradient(float x, ACTIVATION a)
@@ -135,6 +158,7 @@ float gradient(float x, ACTIVATION a)
         case LHTAN:
             return lhtan_gradient(x);
         case PRELU:
+            // TODO: Backpropagation is not taken care of!
             return prelu_gradient(x, 0.01);
     }
     return 0;

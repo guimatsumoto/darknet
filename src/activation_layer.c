@@ -31,6 +31,7 @@ layer make_activation_layer(int batch, int inputs, ACTIVATION activation)
     l.delta_gpu = cuda_make_array(l.delta, inputs*batch);
 #endif
     l.activation = activation;
+    l.n_activation_weights = 0;
     fprintf(stderr, "Activation Layer: %d inputs\n", inputs);
     return l;
 }
@@ -66,6 +67,9 @@ layer make_activation_prelu_layer(int batch, int inputs, ACTIVATION activation, 
 void forward_activation_layer(layer l, network net)
 {
     copy_cpu(l.outputs*l.batch, net.input, 1, l.output, 1);
+    if (l.activation == PRELU)
+        activate_array_prelu(l.output, l.outputs*l.batch, l.activation,
+                             l.n_activation_weights, l.activation_weights);
     activate_array(l.output, l.outputs*l.batch, l.activation);
 }
 

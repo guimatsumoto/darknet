@@ -189,7 +189,11 @@ convolutional_layer parse_convolutional(list *options, size_params params)
     int binary = option_find_int_quiet(options, "binary", 0);
     int xnor = option_find_int_quiet(options, "xnor", 0);
 
-    convolutional_layer layer = make_convolutional_layer(batch,h,w,c,n,groups,size,stride,padding,activation, batch_normalize, binary, xnor, params.net->adam);
+    convolutional_layer layer;
+    if (activation == PRELU)
+        layer = make_convolutional_prelu_layer(batch,h,w,c,n,groups,size,stride,padding,activation, batch_normalize, binary, xnor, params.net->adam, n);
+    else
+        layer = make_convolutional_layer(batch,h,w,c,n,groups,size,stride,padding,activation, batch_normalize, binary, xnor, params.net->adam);
     layer.flipped = option_find_int_quiet(options, "flipped", 0);
     layer.dot = option_find_float_quiet(options, "dot", 0);
 
@@ -1079,6 +1083,10 @@ void load_convolutional_weights(layer l, FILE *fp)
         }
     }
     fread(l.weights, sizeof(float), num, fp);
+    if (l.activation == PRELU)
+    {
+        fread(l.activation_weights, sizeof(float), l.n_activation_weights, fp);
+    }
     //if(l.c == 3) scal_cpu(num, 1./256, l.weights, 1);
     if (l.flipped) {
         transpose_matrix(l.weights, l.c*l.size*l.size, l.n);
@@ -1091,6 +1099,17 @@ void load_convolutional_weights(layer l, FILE *fp)
 #endif
 }
 
+void load_prelu_weights(layer l, FILE *fp)
+{
+    int num = l.n_activation_weights;
+    fread(l.activation_weights, sizeof(float), num, fp);
+#ifdef GPU
+    if(gpu_index >= 0){
+        // TODO: Probably activation isn't done in GPU, but maybe...
+        //push_prelu_layer(l);
+    }
+#endif
+}
 
 void load_weights_upto(network *net, char *filename, int start, int cutoff)
 {
@@ -1165,6 +1184,10 @@ void load_weights_upto(network *net, char *filename, int start, int cutoff)
                 load_connected_weights(*(l.update_layer), fp, transpose);
                 load_connected_weights(*(l.state_layer), fp, transpose);
             }
+        }
+        if (l.type == ACTIVE)
+        {
+            load_prelu_weights(l, fp);
         }
         if(l.type == LOCAL){
             int locations = l.out_w*l.out_h;
