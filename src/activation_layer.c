@@ -35,6 +35,34 @@ layer make_activation_layer(int batch, int inputs, ACTIVATION activation)
     return l;
 }
 
+layer make_activation_prelu_layer(int batch, int inputs, ACTIVATION activation, int n_activation_weights)
+{
+    layer l = {0};
+    l.type = ACTIVE;
+
+    l.inputs = inputs;
+    l.outputs = inputs;
+    l.batch=batch;
+
+    l.output = calloc(batch*inputs, sizeof(float*));
+    l.delta = calloc(batch*inputs, sizeof(float*));
+
+    l.forward = forward_activation_layer;
+    l.backward = backward_activation_layer;
+#ifdef GPU
+    l.forward_gpu = forward_activation_layer_gpu;
+    l.backward_gpu = backward_activation_layer_gpu;
+
+    l.output_gpu = cuda_make_array(l.output, inputs*batch);
+    l.delta_gpu = cuda_make_array(l.delta, inputs*batch);
+#endif
+    l.activation = activation;
+    l.n_activation_weights = n_activation_weights;
+    l.activation_weights = calloc(l.n_activation_weights, sizeof(float));
+    fprintf(stderr, "Activation Layer: %d inputs\n", inputs);
+    return l;
+}
+
 void forward_activation_layer(layer l, network net)
 {
     copy_cpu(l.outputs*l.batch, net.input, 1, l.output, 1);

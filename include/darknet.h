@@ -227,6 +227,7 @@ struct layer{
     float * weight_updates;
 
     float * activation_weights;
+    int n_activation_weights;
 
     float * delta;
     float * output;
