@@ -396,6 +396,7 @@ struct layer{
     float * rand_gpu;
     float * squared_gpu;
     float * norms_gpu;
+
     float * activation_weights_gpu;
 #ifdef CUDNN
     cudnnTensorDescriptor_t srcTensorDesc, dstTensorDesc;

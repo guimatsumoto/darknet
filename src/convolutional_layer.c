@@ -476,7 +476,6 @@ convolutional_layer make_convolutional_prelu_layer(int batch, int h, int w, int 
             l.x_gpu = cuda_make_array(l.output, l.batch*out_h*out_w*n);
             l.x_norm_gpu = cuda_make_array(l.output, l.batch*out_h*out_w*n);
         }
-
         if (activation == PRELU)
         {
             l.activation_weights_gpu = cuda_make_array(l.activation_weights, l.n_activation_weights);

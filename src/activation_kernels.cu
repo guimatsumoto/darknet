@@ -195,7 +195,7 @@ __global__ void activate_array_kernel(float *x, int n, ACTIVATION a)
 __global__ void activate_array_prelu_kernel(float *x, int n, ACTIVATION a, int n_weights, float *activation_weights)
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    int j = (int)(i/(n/n_weights));
+    int j = (int)floorf(i/(n/n_weights));
     if(i < n) x[i] = activate_prelu_kernel(x[i], a, activation_weights[j]);
 }
 
