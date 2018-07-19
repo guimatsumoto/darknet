@@ -187,8 +187,8 @@ void forward_convolutional_prelu_layer_gpu(convolutional_layer l, network net)
 
     if (l.activation == PRELU)
     {
-        activate_array_prelu_gpu(l.output, l.outputs*l.batch, l.activation,
-                             l.n_activation_weights, l.activation_weights);
+        activate_array_prelu_gpu(l.output_gpu, l.outputs*l.batch, l.activation,
+                             l.n_activation_weights, l.activation_weights_gpu);
     }
     else
         activate_array_gpu(l.output_gpu, l.outputs*l.batch, l.activation);

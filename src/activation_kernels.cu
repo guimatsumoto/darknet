@@ -196,7 +196,7 @@ __global__ void activate_array_prelu_kernel(float *x, int n, ACTIVATION a, int n
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
     int j = (int)(i/(n/n_weights));
-    if(i < n) x[i] = activate_prelu_kernel(x[i], a, activation_weights_gpu[j]);
+    if(i < n) x[i] = activate_prelu_kernel(x[i], a, activation_weights[j]);
 }
 
 __global__ void gradient_array_kernel(float *x, int n, ACTIVATION a, float *delta)
