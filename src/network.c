@@ -726,9 +726,6 @@ void forward_network_gpu(network *netp)
         if(l.delta_gpu){
             fill_gpu(l.outputs * l.batch, 0, l.delta_gpu, 1);
         }
-        //if (l.type == CONVOLUTIONAL)
-        //    if (l.activation == PRELU)
-        //        fill_gpu(l.n_activation_weights, 0, l.activation_weights_gpu, 1);
         l.forward_gpu(l, net);
         net.input_gpu = l.output_gpu;
         net.input = l.output;
